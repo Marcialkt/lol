@@ -267,7 +267,7 @@ body>*:not(#bg){position:relative;z-index:1}
 
 <!-- CLICK ZONE -->
 <div id="czone">
-  <div id="owrap" ontouchstart="tap(event)" onclick="tap(event)">
+  <div id="owrap">
     <div class="rng" id="r4"></div>
     <div class="rng" id="r3"></div>
     <div class="rng" id="r2"></div>
@@ -373,12 +373,17 @@ function fmt(n){
 }
 
 // ══════════════════════════════════════════
-//  TAP
+//  TAP  — usa pointerdown para evitar doble disparo touch+click
 // ══════════════════════════════════════════
+document.getElementById('owrap').addEventListener('pointerdown', tap, {passive:false});
+let lastTapMs=0;
 function tap(e){
   e.preventDefault();
-  const t=e.touches?e.touches[0]:e;
-  const x=t?t.clientX:window.innerWidth/2, y=t?t.clientY:window.innerHeight/2;
+  // debounce: ignora si han pasado menos de 80ms (previene doble disparo)
+  const now=Date.now();
+  if(now-lastTapMs<80) return;
+  lastTapMs=now;
+  const x=e.clientX||window.innerWidth/2, y=e.clientY||window.innerHeight/2;
   let g=cpow, isc=crit>0&&Math.random()<crit;
   if(isc) g=Math.floor(g*cmul);
   money+=g; total+=g;
@@ -439,11 +444,11 @@ function fxBuy(txt, tc){
 
 // ══════════════════════════════════════════
 //  VISIBLE LOGIC
-//  - Always show first 3 upgrades
-//  - Others appear when total >= cost/12
+//  Aparece cuando tienes el 50% del coste en dinero actual,
+//  o ya fue vista antes (knownVis), o ya está comprada.
 // ══════════════════════════════════════════
 function getVisible(){
-  return UPS.filter((u,i)=>P[u.id]||i<3||total>=u.cost/12);
+  return UPS.filter(u=>P[u.id]||knownVis.has(u.id)||money>=u.cost*0.5);
 }
 
 // ══════════════════════════════════════════
@@ -452,17 +457,12 @@ function getVisible(){
 let dirty=true;
 
 function checkNewUnlocks(){
-  const vis=getVisible();
   let changed=false;
-  for(const u of vis){
-    if(!knownVis.has(u.id)){
+  for(const u of UPS){
+    if(!knownVis.has(u.id)&&money>=u.cost*0.5){
       knownVis.add(u.id);
-      // Don't mark initial 3 as NEW
-      const idx=UPS.indexOf(u);
-      if(idx>=3){
-        NEW[u.id]=true;
-        showToast('🔓 ¡Nueva mejora disponible: '+u.name+'!');
-      }
+      NEW[u.id]=true;
+      showToast('🔓 '+u.name+' disponible!');
       changed=true;
     }
   }
@@ -613,8 +613,6 @@ function load(){
 //  INIT
 // ══════════════════════════════════════════
 load();
-// Seed knownVis with initial 3 so they don't fire NEW on first render
-UPS.slice(0,3).forEach(u=>knownVis.add(u.id));
 setInterval(save,15000);
 loop();
 </script>
