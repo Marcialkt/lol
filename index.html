@@ -3,1245 +3,717 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Galaxy Empire - Clicker</title>
+<title>Galaxy Clicker</title>
 <style>
-  :root {
-    --bg: #050510;
-    --panel: #0a0a2a;
-    --panel2: #0d0d35;
-    --accent: #4f8ef7;
-    --accent2: #a259ff;
-    --gold: #ffd700;
-    --green: #00e676;
-    --red: #ff5252;
-    --text: #e0e6ff;
-    --dim: #6070a0;
-    --border: #1a1a4a;
-    --glow: 0 0 20px rgba(79,142,247,0.4);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    user-select: none;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
 
-  /* ── HEADER ── */
-  #header {
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    padding: 8px 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
-  }
-  #header h1 { font-size: 14px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
-  #prestige-btn {
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-    border: none; border-radius: 8px;
-    color: #fff; font-size: 11px; font-weight: 700;
-    padding: 5px 10px; cursor: pointer;
-    display: none; transition: transform .1s;
-    letter-spacing: .5px;
-  }
-  #prestige-btn:active { transform: scale(.95); }
-  #star-count { font-size: 12px; color: var(--gold); display: none; }
+:root {
+  --bg: #07071a;
+  --card: #0e0e2e;
+  --border: #1c1c4a;
+  --blue: #4f8ef7;
+  --purple: #a259ff;
+  --gold: #ffd700;
+  --green: #00e676;
+  --text: #dde4ff;
+  --dim: #5a6690;
+}
 
-  /* ── RESOURCES BAR ── */
-  #resources {
-    background: var(--panel2);
-    border-bottom: 1px solid var(--border);
-    padding: 6px 12px;
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  #resources::-webkit-scrollbar { display: none; }
-  .res-item {
-    display: flex; flex-direction: column; align-items: center;
-    min-width: 80px; flex: 1;
-  }
-  .res-label { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: .5px; }
-  .res-value { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.2; }
-  .res-rate { font-size: 10px; color: var(--green); }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, sans-serif;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-  /* ── MAIN AREA ── */
-  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+/* ── TOP BAR ── */
+#topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 8px;
+}
+.stat { text-align: center; flex: 1; }
+.stat-val { font-size: 18px; font-weight: 800; color: var(--gold); line-height: 1; }
+.stat-label { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+.stat-sub { font-size: 11px; color: var(--green); margin-top: 1px; }
 
-  /* TABS */
-  #tabs {
-    display: flex;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .tab {
-    flex: 1; padding: 10px 4px; text-align: center;
-    font-size: 11px; font-weight: 600; color: var(--dim);
-    cursor: pointer; border-bottom: 2px solid transparent;
-    transition: all .2s; text-transform: uppercase; letter-spacing: .5px;
-  }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .tab-icon { font-size: 16px; display: block; margin-bottom: 2px; }
+/* ── CLICK ZONE ── */
+#click-zone {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px 12px;
+  gap: 10px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(79,142,247,.08) 0%, transparent 70%);
+}
 
-  /* PANELS */
-  #panels { flex: 1; overflow: hidden; position: relative; }
-  .panel { position: absolute; inset: 0; overflow-y: auto; display: none; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-  .panel.active { display: block; }
-  .panel::-webkit-scrollbar { width: 4px; }
-  .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+#orb-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
 
-  /* ── CLICKER PANEL ── */
-  #panel-click {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 20px 16px; gap: 16px;
-  }
-  #click-area {
-    position: relative; width: 200px; height: 200px;
-    cursor: pointer; flex-shrink: 0;
-  }
-  #planet {
-    width: 100%; height: 100%;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #6ea4f8 0%, #1a3a8f 40%, #0a0f3a 100%);
-    box-shadow: 0 0 40px rgba(79,142,247,.5), 0 0 80px rgba(79,142,247,.2), inset 0 0 30px rgba(0,0,0,.5);
-    transition: transform .08s, box-shadow .08s;
-    will-change: transform;
-  }
-  #planet.pulse {
-    transform: scale(0.94);
-    box-shadow: 0 0 60px rgba(79,142,247,.8), 0 0 120px rgba(79,142,247,.4), inset 0 0 30px rgba(0,0,0,.5);
-  }
-  #planet-ring {
-    position: absolute; inset: -15px;
-    border-radius: 50%;
-    border: 2px solid rgba(79,142,247,.3);
-    animation: ring-spin 8s linear infinite;
-    pointer-events: none;
-  }
-  #planet-ring::before {
-    content: ''; position: absolute;
-    width: 10px; height: 10px; background: var(--accent);
-    border-radius: 50%; top: 50%; left: -5px;
-    transform: translateY(-50%);
-    box-shadow: 0 0 8px var(--accent);
-  }
-  @keyframes ring-spin { to { transform: rotate(360deg); } }
-  #orbit2 {
-    position: absolute; inset: -30px;
-    border-radius: 50%;
-    border: 1px dashed rgba(162,89,255,.2);
-    animation: ring-spin 15s linear infinite reverse;
-    pointer-events: none;
-  }
-  #orbit2::before {
-    content: ''; position: absolute;
-    width: 7px; height: 7px; background: var(--accent2);
-    border-radius: 50%; top: 0; left: 50%;
-    transform: translateX(-50%);
-    box-shadow: 0 0 6px var(--accent2);
-  }
-  #click-power { font-size: 14px; color: var(--dim); text-align: center; }
-  #click-power span { color: var(--accent); font-weight: 700; }
-  #milestone-banner {
-    background: linear-gradient(135deg, rgba(255,215,0,.15), rgba(255,215,0,.05));
-    border: 1px solid rgba(255,215,0,.3);
-    border-radius: 10px; padding: 8px 16px;
-    font-size: 12px; color: var(--gold); text-align: center;
-    display: none; width: 100%;
-  }
+#orb {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%,
+    #8ab8ff 0%, #2a6af0 30%, #0d2a80 65%, #060d30 100%);
+  box-shadow:
+    0 0 30px rgba(79,142,247,.5),
+    0 0 70px rgba(79,142,247,.2),
+    inset 0 -10px 30px rgba(0,0,30,.6),
+    inset 5px 5px 20px rgba(255,255,255,.08);
+  transition: transform .07s, box-shadow .07s;
+  will-change: transform;
+}
+#orb.tap {
+  transform: scale(.91);
+  box-shadow:
+    0 0 50px rgba(79,142,247,.9),
+    0 0 100px rgba(79,142,247,.4),
+    inset 0 -10px 30px rgba(0,0,30,.6);
+}
 
-  /* Floating numbers */
-  .float-num {
-    position: fixed; font-weight: 700; font-size: 18px;
-    color: var(--accent); pointer-events: none; z-index: 999;
-    animation: floatUp 1s ease-out forwards;
-    text-shadow: 0 0 8px var(--accent);
-  }
-  .float-num.crit { color: var(--gold); font-size: 24px; text-shadow: 0 0 12px var(--gold); }
-  @keyframes floatUp {
-    0% { opacity: 1; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(-80px) scale(.6); }
-  }
+/* Rotating ring */
+#ring1 {
+  position: absolute; inset: -12px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(79,142,247,.6);
+  border-right-color: rgba(79,142,247,.2);
+  animation: spin 4s linear infinite;
+  pointer-events: none;
+}
+#ring2 {
+  position: absolute; inset: -22px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  border-bottom-color: rgba(162,89,255,.5);
+  border-left-color: rgba(162,89,255,.15);
+  animation: spin 9s linear infinite reverse;
+  pointer-events: none;
+}
+#ring3 {
+  position: absolute; inset: -34px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255,215,0,.1);
+  animation: spin 18s linear infinite;
+  pointer-events: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Particles */
-  .particle {
-    position: fixed; width: 6px; height: 6px;
-    border-radius: 50%; pointer-events: none; z-index: 998;
-    animation: particleAnim .8s ease-out forwards;
-  }
-  @keyframes particleAnim {
-    0% { opacity: 1; transform: translate(0,0) scale(1); }
-    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
-  }
+#click-hint { font-size: 12px; color: var(--dim); letter-spacing: .3px; }
+#click-hint span { color: var(--blue); font-weight: 600; }
 
-  /* ── BUILDINGS PANEL ── */
-  #panel-build { padding: 8px; }
-  .building-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px; margin-bottom: 8px;
-    padding: 10px 12px; display: flex; align-items: center;
-    gap: 10px; cursor: pointer; transition: all .15s;
-    position: relative; overflow: hidden;
-  }
-  .building-card:active { transform: scale(.98); }
-  .building-card.affordable { border-color: rgba(79,142,247,.4); }
-  .building-card.affordable::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(90deg, rgba(79,142,247,.05), transparent);
-  }
-  .building-card.maxed { border-color: rgba(255,215,0,.4); }
-  .building-card.locked { opacity: .4; cursor: default; }
-  .building-icon { font-size: 32px; flex-shrink: 0; filter: drop-shadow(0 0 6px rgba(79,142,247,.5)); }
-  .building-info { flex: 1; min-width: 0; }
-  .building-name { font-size: 13px; font-weight: 700; }
-  .building-desc { font-size: 10px; color: var(--dim); margin-top: 1px; }
-  .building-rate { font-size: 11px; color: var(--green); margin-top: 2px; }
-  .building-right { text-align: right; flex-shrink: 0; }
-  .building-owned { font-size: 22px; font-weight: 800; color: var(--accent); }
-  .building-cost { font-size: 11px; color: var(--gold); }
-  .building-buy-btn {
-    background: var(--accent); border: none; border-radius: 6px;
-    color: #fff; font-size: 10px; font-weight: 700;
-    padding: 3px 8px; cursor: pointer; margin-top: 3px;
-    letter-spacing: .3px;
-  }
+/* ── UPGRADES SECTION ── */
+#upgrades-section {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 10px 16px;
+  scrollbar-width: none;
+}
+#upgrades-section::-webkit-scrollbar { display: none; }
 
-  /* ── UPGRADES PANEL ── */
-  #panel-upgrades { padding: 8px; }
-  .upgrade-section { margin-bottom: 12px; }
-  .upgrade-section h3 { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; padding: 0 4px; }
-  .upgrades-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .upgrade-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px;
-    cursor: pointer; transition: all .15s;
-    position: relative; overflow: hidden;
-  }
-  .upgrade-card:active { transform: scale(.97); }
-  .upgrade-card.affordable { border-color: rgba(79,142,247,.5); }
-  .upgrade-card.bought { border-color: rgba(0,230,118,.3); background: rgba(0,230,118,.05); cursor: default; }
-  .upgrade-card.locked { opacity: .3; cursor: default; }
-  .upgrade-card .up-icon { font-size: 24px; margin-bottom: 4px; }
-  .upgrade-card .up-name { font-size: 12px; font-weight: 700; }
-  .upgrade-card .up-desc { font-size: 10px; color: var(--dim); margin-top: 2px; }
-  .upgrade-card .up-cost { font-size: 11px; color: var(--gold); margin-top: 4px; }
-  .upgrade-card .up-bought { position: absolute; top: 6px; right: 6px; font-size: 10px; color: var(--green); }
+#upgrades-header {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  padding: 8px 4px 6px;
+  font-size: 10px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#upgrades-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
 
-  /* ── ACHIEVEMENTS PANEL ── */
-  #panel-achieve { padding: 8px; }
-  .achieve-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 12px;
-    margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
-  }
-  .achieve-card.unlocked { border-color: rgba(255,215,0,.4); background: rgba(255,215,0,.04); }
-  .achieve-card.locked { opacity: .4; }
-  .achieve-icon { font-size: 28px; }
-  .achieve-info .achieve-name { font-size: 13px; font-weight: 700; }
-  .achieve-info .achieve-desc { font-size: 10px; color: var(--dim); margin-top: 1px; }
-  .achieve-info .achieve-reward { font-size: 10px; color: var(--gold); margin-top: 2px; }
+/* upgrade card */
+.upg-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: border-color .2s, background .2s, transform .1s;
+  animation: slideIn .3s ease-out;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.upg-card.can-buy {
+  border-color: rgba(79,142,247,.45);
+  background: rgba(79,142,247,.05);
+}
+.upg-card.can-buy:active { transform: scale(.97); }
+.upg-card.bought {
+  opacity: .45;
+  border-color: rgba(0,230,118,.2);
+  background: rgba(0,230,118,.03);
+}
+.upg-icon { font-size: 30px; flex-shrink: 0; line-height: 1; }
+.upg-body { flex: 1; min-width: 0; }
+.upg-name { font-size: 14px; font-weight: 700; }
+.upg-desc { font-size: 11px; color: var(--dim); margin-top: 2px; line-height: 1.4; }
+.upg-right { text-align: right; flex-shrink: 0; }
+.upg-cost {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gold);
+}
+.upg-cost.afford { color: var(--green); }
+.upg-cost.bought-label { color: var(--green); font-size: 18px; }
+.upg-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.upg-bar { height: 100%; background: linear-gradient(90deg, var(--blue), var(--purple)); border-radius: 2px; transition: width .4s; }
+.upg-type-badge {
+  display: inline-block;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.badge-click  { background: rgba(79,142,247,.2);  color: var(--blue); }
+.badge-auto   { background: rgba(0,230,118,.15);  color: var(--green); }
+.badge-multi  { background: rgba(255,215,0,.15);  color: var(--gold); }
+.badge-crit   { background: rgba(255,82,82,.2);   color: #ff8080; }
+.badge-special{ background: rgba(162,89,255,.2);  color: var(--purple); }
 
-  /* ── PRESTIGE PANEL ── */
-  #panel-prestige { padding: 16px; }
-  .prestige-header { text-align: center; margin-bottom: 20px; }
-  .prestige-header h2 { font-size: 20px; color: var(--accent2); margin-bottom: 8px; }
-  .prestige-header p { font-size: 12px; color: var(--dim); line-height: 1.6; }
-  .prestige-reward {
-    background: linear-gradient(135deg, rgba(162,89,255,.1), rgba(79,142,247,.1));
-    border: 1px solid rgba(162,89,255,.3);
-    border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; text-align: center;
-  }
-  .prestige-reward .pr-value { font-size: 28px; font-weight: 800; color: var(--gold); }
-  .prestige-reward .pr-label { font-size: 11px; color: var(--dim); }
-  .prestige-bonus { font-size: 13px; color: var(--green); text-align: center; margin-bottom: 16px; }
-  #do-prestige {
-    width: 100%; padding: 14px;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-    border: none; border-radius: 12px; color: #fff;
-    font-size: 16px; font-weight: 800; cursor: pointer;
-    box-shadow: 0 0 20px rgba(162,89,255,.4);
-    transition: transform .1s;
-  }
-  #do-prestige:active { transform: scale(.97); }
-  #do-prestige:disabled { opacity: .4; cursor: not-allowed; }
-  .stars-info { margin-top: 20px; }
-  .stars-info h3 { font-size: 13px; font-weight: 700; color: var(--gold); margin-bottom: 8px; }
-  .star-upgrade {
-    background: var(--panel); border: 1px solid rgba(255,215,0,.2);
-    border-radius: 10px; padding: 10px 12px; margin-bottom: 6px;
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer; transition: all .15s;
-  }
-  .star-upgrade:active { transform: scale(.98); }
-  .star-upgrade.bought { opacity: .5; cursor: default; }
-  .su-info .su-name { font-size: 13px; font-weight: 700; }
-  .su-info .su-desc { font-size: 10px; color: var(--dim); }
-  .su-cost { font-size: 13px; color: var(--gold); font-weight: 700; }
+/* ── EFFECTS ── */
+.float {
+  position: fixed;
+  font-weight: 800;
+  pointer-events: none;
+  z-index: 9999;
+  animation: floatUp .9s ease-out forwards;
+}
+@keyframes floatUp {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-70px) scale(.65); }
+}
+.particle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  animation: pOut .7s ease-out forwards;
+}
+@keyframes pOut {
+  0%   { opacity: 1; transform: translate(0,0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx),var(--dy)) scale(0); }
+}
+.ripple {
+  position: fixed;
+  border-radius: 50%;
+  border: 2px solid rgba(79,142,247,.7);
+  pointer-events: none;
+  z-index: 9997;
+  transform: translate(-50%,-50%);
+  animation: rippleOut .55s ease-out forwards;
+}
+@keyframes rippleOut {
+  0%   { width:10px; height:10px; opacity:.8; }
+  100% { width:110px; height:110px; opacity:0; }
+}
 
-  /* ── NOTIFICATION TOAST ── */
-  #toast {
-    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-    background: var(--panel2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 16px;
-    font-size: 12px; color: var(--text); z-index: 1000;
-    opacity: 0; transition: opacity .3s; pointer-events: none;
-    text-align: center; max-width: 280px; white-space: nowrap;
-  }
-  #toast.show { opacity: 1; }
+/* unlock flash */
+.unlock-flash {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle, rgba(79,142,247,.15), transparent 60%);
+  pointer-events: none;
+  z-index: 9996;
+  animation: flashOut .5s ease-out forwards;
+}
+@keyframes flashOut { to { opacity: 0; } }
 
-  /* Achievement popup */
-  #achieve-pop {
-    position: fixed; top: -80px; left: 50%; transform: translateX(-50%);
-    background: linear-gradient(135deg, rgba(255,215,0,.2), rgba(255,215,0,.05));
-    border: 1px solid rgba(255,215,0,.5);
-    border-radius: 12px; padding: 10px 16px;
-    z-index: 1001; transition: top .4s cubic-bezier(.34,1.56,.64,1);
-    text-align: center; min-width: 240px;
-  }
-  #achieve-pop.show { top: 80px; }
-  #achieve-pop .ap-title { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
-  #achieve-pop .ap-name { font-size: 14px; font-weight: 700; margin-top: 2px; }
+/* toast */
+#toast {
+  position: fixed;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14,14,46,.95);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-size: 13px;
+  z-index: 9995;
+  opacity: 0;
+  transition: opacity .25s;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 90vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#toast.show { opacity: 1; }
 
-  /* Prestige flash */
-  #prestige-flash {
-    position: fixed; inset: 0; background: radial-gradient(circle, rgba(162,89,255,.8), transparent 70%);
-    z-index: 2000; pointer-events: none; opacity: 0; transition: opacity .5s;
-  }
-  #prestige-flash.show { opacity: 1; }
+/* milestone pill */
+#milestone {
+  position: fixed;
+  top: 70px; left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: linear-gradient(135deg, rgba(255,215,0,.2), rgba(255,165,0,.1));
+  border: 1px solid rgba(255,215,0,.4);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--gold);
+  z-index: 9994;
+  opacity: 0;
+  transition: opacity .3s, transform .3s;
+  pointer-events: none;
+}
+#milestone.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* Auto-clicker visual */
-  @keyframes autoPulse {
-    0%,100% { box-shadow: 0 0 40px rgba(79,142,247,.5), 0 0 80px rgba(79,142,247,.2); }
-    50% { box-shadow: 0 0 60px rgba(79,142,247,.9), 0 0 120px rgba(79,142,247,.5); }
-  }
+/* stars */
+#stars-bg {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 0; overflow: hidden;
+}
+.sd {
+  position: absolute; background: #fff; border-radius: 50%;
+  animation: tw var(--d) ease-in-out infinite var(--delay);
+}
+@keyframes tw { 0%,100%{opacity:var(--o)} 50%{opacity:.05} }
 
-  /* Stars bg */
-  #stars-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-  .star-dot {
-    position: absolute; background: #fff; border-radius: 50%;
-    animation: twinkle var(--d) ease-in-out infinite;
-  }
-  @keyframes twinkle {
-    0%,100% { opacity: var(--o); }
-    50% { opacity: .1; }
-  }
-
-  /* number formatting */
-  .big { color: var(--gold); }
-
-  /* MOBILE bottom nav */
-  #bottom-nav {
-    background: var(--panel);
-    border-top: 1px solid var(--border);
-    display: flex;
-    flex-shrink: 0;
-    z-index: 10;
-  }
-  .nav-item {
-    flex: 1; padding: 8px 4px; text-align: center;
-    cursor: pointer; transition: all .2s;
-    color: var(--dim); font-size: 10px;
-    border-top: 2px solid transparent;
-  }
-  .nav-item .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
-  .nav-item.active { color: var(--accent); border-top-color: var(--accent); }
-  .nav-badge {
-    position: absolute; top: 2px; right: calc(50% - 16px);
-    background: var(--red); color: #fff; font-size: 8px;
-    border-radius: 6px; padding: 1px 4px; font-weight: 700;
-    display: none;
-  }
-  .nav-item { position: relative; }
-
-  /* Progress bar */
-  .progress-bar { background: var(--border); border-radius: 4px; height: 4px; margin-top: 4px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width .3s; }
-
-  /* Info text */
-  .info-section { padding: 8px 12px 4px; font-size: 10px; color: var(--dim); }
-
-  /* wave animation on click area */
-  .wave-ring {
-    position: fixed; border-radius: 50%;
-    border: 2px solid rgba(79,142,247,.6);
-    pointer-events: none; z-index: 997;
-    animation: waveExpand .6s ease-out forwards;
-  }
-  @keyframes waveExpand {
-    0% { width: 20px; height: 20px; opacity: .8; }
-    100% { width: 120px; height: 120px; opacity: 0; }
-  }
+/* scrollable area sits above stars */
+body > * { position: relative; z-index: 1; }
 </style>
 </head>
 <body>
 
 <div id="stars-bg"></div>
-<div id="prestige-flash"></div>
+<div id="toast"></div>
+<div id="milestone"></div>
 
-<!-- ACHIEVEMENT POPUP -->
-<div id="achieve-pop">
-  <div class="ap-title">🏆 Logro Desbloqueado</div>
-  <div class="ap-name" id="achieve-pop-name"></div>
-</div>
-
-<!-- TOAST -->
-<div id="toast" id="toast"></div>
-
-<!-- HEADER -->
-<div id="header">
-  <h1>🌌 Galaxy Empire</h1>
-  <span id="star-count">⭐ <span id="star-val">0</span></span>
-  <button id="prestige-btn">✨ Prestige</button>
-</div>
-
-<!-- RESOURCES -->
-<div id="resources">
-  <div class="res-item">
-    <span class="res-label">Energía</span>
-    <span class="res-value" id="res-energy">0</span>
-    <span class="res-rate" id="rate-energy">+0/s</span>
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="stat">
+    <div class="stat-val" id="money">0</div>
+    <div class="stat-label">Energía</div>
+    <div class="stat-sub" id="per-sec">+0/s</div>
   </div>
-  <div class="res-item">
-    <span class="res-label">Materia</span>
-    <span class="res-value" id="res-matter">0</span>
-    <span class="res-rate" id="rate-matter">+0/s</span>
+  <div class="stat">
+    <div class="stat-val" id="click-power-display">1</div>
+    <div class="stat-label">Por click</div>
   </div>
-  <div class="res-item">
-    <span class="res-label">Total Clicks</span>
-    <span class="res-value" id="res-clicks">0</span>
-    <span class="res-rate" id="click-ps"></span>
-  </div>
-  <div class="res-item">
-    <span class="res-label">Mejor/s</span>
-    <span class="res-value" id="res-aps">0</span>
-    <span class="res-rate" style="color:var(--accent2)">E+M/s</span>
+  <div class="stat">
+    <div class="stat-val" id="bought-count">0</div>
+    <div class="stat-label">Mejoras</div>
   </div>
 </div>
 
-<!-- MAIN -->
-<div id="main">
-  <div id="tabs">
-    <div class="tab active" onclick="switchTab('click',this)" data-tab="click">
-      <span class="tab-icon">🪐</span>Clic
-    </div>
-    <div class="tab" onclick="switchTab('build',this)" data-tab="build">
-      <span class="tab-icon">🏭</span>Edificios
-    </div>
-    <div class="tab" onclick="switchTab('upgrades',this)" data-tab="upgrades">
-      <span class="tab-icon">⚡</span>Mejoras
-    </div>
-    <div class="tab" onclick="switchTab('achieve',this)" data-tab="achieve">
-      <span class="tab-icon">🏆</span>Logros
-    </div>
-    <div class="tab" onclick="switchTab('prestige',this)" data-tab="prestige">
-      <span class="tab-icon">✨</span>Prestige
-    </div>
+<!-- CLICK ZONE -->
+<div id="click-zone">
+  <div id="orb-wrap" ontouchstart="tap(event)" onclick="tap(event)">
+    <div id="ring3"></div>
+    <div id="ring2"></div>
+    <div id="ring1"></div>
+    <div id="orb"></div>
   </div>
+  <div id="click-hint">Toca el planeta · <span id="hint-val">1</span> energía por click</div>
+</div>
 
-  <div id="panels">
-    <!-- CLICK PANEL -->
-    <div class="panel active" id="panel-click">
-      <div id="click-area" ontouchstart="handleClick(event)" onclick="handleClick(event)">
-        <div id="planet"></div>
-        <div id="planet-ring"></div>
-        <div id="orbit2"></div>
-      </div>
-      <div id="click-power">Poder de click: <span id="cp-val">1</span> energía</div>
-      <div id="milestone-banner"></div>
-      <div style="width:100%; padding: 0 4px;">
-        <div class="info-section">Próximo hito</div>
-        <div class="progress-bar" style="margin: 0 12px 8px;">
-          <div class="progress-fill" id="milestone-progress" style="width:0%"></div>
-        </div>
-        <div style="text-align:center; font-size:10px; color:var(--dim); padding-bottom:8px;" id="milestone-label">Primer edificio en 10 energía</div>
-      </div>
-      <div id="auto-info" style="font-size:11px; color:var(--dim); text-align:center; display:none;">
-        Auto-generando <span id="auto-val" style="color:var(--green);"></span> / sec
-      </div>
-    </div>
-
-    <!-- BUILDINGS PANEL -->
-    <div class="panel" id="panel-build">
-      <div class="info-section">Compra edificios para generar energía y materia automáticamente.</div>
-      <div id="buildings-list"></div>
-    </div>
-
-    <!-- UPGRADES PANEL -->
-    <div class="panel" id="panel-upgrades">
-      <div id="upgrades-list"></div>
-    </div>
-
-    <!-- ACHIEVEMENTS PANEL -->
-    <div class="panel" id="panel-achieve">
-      <div class="info-section">Desbloquea logros completando objetivos.</div>
-      <div id="achievements-list"></div>
-    </div>
-
-    <!-- PRESTIGE PANEL -->
-    <div class="panel" id="panel-prestige">
-      <div class="prestige-header">
-        <h2>✨ Prestige</h2>
-        <p>Reinicia tu progreso a cambio de <strong style="color:var(--gold)">Estrellas</strong>.<br>
-        Las estrellas te dan bonificaciones permanentes para futuras partidas.</p>
-      </div>
-      <div class="prestige-reward">
-        <div class="pr-value">⭐ <span id="prestige-stars-gain">0</span></div>
-        <div class="pr-label">Estrellas que ganarías ahora</div>
-      </div>
-      <div class="prestige-bonus" id="prestige-bonus-text">Bonus actual: +0% producción</div>
-      <button id="do-prestige" onclick="doPrestige()" disabled>
-        Requiere 1e6 energía total
-      </button>
-
-      <div class="stars-info">
-        <h3>⭐ Mejoras con Estrellas (<span id="stars-display">0</span> disponibles)</h3>
-        <div id="star-upgrades-list"></div>
-      </div>
-    </div>
+<!-- UPGRADES -->
+<div id="upgrades-section">
+  <div id="upgrades-header">⚡ Mejoras disponibles</div>
+  <div id="upgrades-list"></div>
+  <div id="end-msg" style="display:none; text-align:center; padding:20px; font-size:13px; color:var(--dim);">
+    🌌 ¡Has dominado el universo! Todas las mejoras compradas.
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════
-//  GAME STATE
-// ═══════════════════════════════════════════
-const G = {
-  energy: 0,
-  matter: 0,
-  totalEnergy: 0,
-  totalClicks: 0,
-  clickPower: 1,
-  autoEnergy: 0,
-  autoMatter: 0,
-  stars: 0,
-  prestigeCount: 0,
-  bestAPS: 0,
-  buildings: {},
-  upgrades: {},
-  achievements: {},
-  starUpgrades: {},
-  prestigeMultiplier: 1,
-  critChance: 0.05,
-  critMulti: 3,
-  lastSave: Date.now(),
-};
+// ─────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────
+let money      = 0;
+let totalEarned= 0;
+let clickPow   = 1;
+let autoPerSec = 0;
+let critChance = 0;
+let critMulti  = 2;
+let boughtCount= 0;
+const purchased = {};
 
-// ═══════════════════════════════════════════
-//  BUILDINGS DEFINITION
-// ═══════════════════════════════════════════
-const BUILDINGS = [
-  { id:'solar',    icon:'☀️',  name:'Panel Solar',         desc:'Capta energía solar',             baseCost:10,    baseE:0.1,  baseM:0,    costMult:1.15 },
-  { id:'wind',     icon:'🌬️', name:'Turbina Eólica',       desc:'Genera energía del viento',        baseCost:80,    baseE:0.5,  baseM:0,    costMult:1.15 },
-  { id:'nuclear',  icon:'⚛️',  name:'Planta Nuclear',       desc:'Fisión atómica controlada',        baseCost:500,   baseE:2,    baseM:0.1,  costMult:1.15 },
-  { id:'dark',     icon:'🌑',  name:'Colector de Materia',  desc:'Extrae materia oscura',            baseCost:3000,  baseE:8,    baseM:0.5,  costMult:1.15 },
-  { id:'quantum',  icon:'⚡',  name:'Reactor Cuántico',     desc:'Fluctuaciones cuánticas',          baseCost:20000, baseE:30,   baseM:2,    costMult:1.15 },
-  { id:'neutron',  icon:'💫',  name:'Estrella de Neutrones',desc:'Gravedad extrema = energía',       baseCost:150000,baseE:120,  baseM:10,   costMult:1.15 },
-  { id:'blackhole',icon:'🕳️', name:'Motor de Agujero Negro',desc:'Curvatura espacio-tiempo',        baseCost:1e6,   baseE:500,  baseM:50,   costMult:1.15 },
-  { id:'dyson',    icon:'🌟',  name:'Esfera de Dyson',      desc:'Envuelve una estrella',            baseCost:1e7,   baseE:2000, baseM:200,  costMult:1.15 },
-  { id:'wormhole', icon:'🌀',  name:'Generador de Agujeros de Gusano',desc:'Energía de universos paralelos', baseCost:1e8, baseE:8000, baseM:1000, costMult:1.15 },
-  { id:'bigbang',  icon:'💥',  name:'Simulador de Big Bang', desc:'Recrear el inicio del universo',  baseCost:1e10, baseE:50000,baseM:10000,costMult:1.15 },
-];
-
-// ═══════════════════════════════════════════
-//  UPGRADES DEFINITION
-// ═══════════════════════════════════════════
+// ─────────────────────────────────────────
+//  UPGRADES LIST  (50 mejoras progresivas)
+// ─────────────────────────────────────────
+// type: click=more per click | auto=+N/s | multi=multiplies everything | crit | special
 const UPGRADES = [
-  // Click upgrades
-  { id:'click1',   cat:'click', icon:'👆', name:'Clic Mejorado',     desc:'x2 poder de clic',        cost:100,    req:()=>G.totalClicks>=10,   effect:()=>{ G.clickPower*=2; } },
-  { id:'click2',   cat:'click', icon:'👊', name:'Clic Potenciado',   desc:'x2 poder de clic',        cost:2000,   req:()=>G.totalClicks>=100,  effect:()=>{ G.clickPower*=2; } },
-  { id:'click3',   cat:'click', icon:'⚡', name:'Hiperclic',         desc:'x3 poder de clic',        cost:20000,  req:()=>G.totalClicks>=500,  effect:()=>{ G.clickPower*=3; } },
-  { id:'click4',   cat:'click', icon:'💥', name:'Clic Cuántico',     desc:'x5 poder de clic',        cost:500000, req:()=>G.totalClicks>=2000, effect:()=>{ G.clickPower*=5; } },
-  { id:'click5',   cat:'click', icon:'🌌', name:'Singularidad',      desc:'x10 poder de clic',       cost:1e7,    req:()=>G.totalClicks>=10000,effect:()=>{ G.clickPower*=10; } },
-  { id:'crit1',    cat:'click', icon:'🎯', name:'Golpe Crítico',     desc:'+10% probabilidad crítico',cost:5000,  req:()=>G.totalClicks>=200, effect:()=>{ G.critChance+=0.1; } },
-  { id:'crit2',    cat:'click', icon:'💢', name:'Crítico Mejorado',  desc:'Críticos hacen x5 daño',  cost:100000, req:()=>G.upgrades.crit1,   effect:()=>{ G.critMulti=5; } },
-  { id:'autocrit', cat:'click', icon:'🔥', name:'Auto-Crítico',      desc:'+5% probabilidad crítico', cost:1e6,   req:()=>G.upgrades.crit2,   effect:()=>{ G.critChance+=0.05; } },
+  // ── Tier 1  (0 – 1K) ──────────────────────────────
+  { id:'c1',   icon:'👆', name:'Clic Básico',           desc:'+1 energía por click',      cost:10,     type:'click',   apply:()=>{ clickPow+=1; } },
+  { id:'a1',   icon:'⚙️', name:'Generador Solar',        desc:'+1 energía / segundo',     cost:25,     type:'auto',    apply:()=>{ autoPerSec+=1; } },
+  { id:'c2',   icon:'✌️', name:'Clic Doble',             desc:'x2 poder de click',         cost:80,     type:'click',   apply:()=>{ clickPow*=2; } },
+  { id:'a2',   icon:'🌬️', name:'Turbina de Viento',      desc:'+3 energía / segundo',     cost:150,    type:'auto',    apply:()=>{ autoPerSec+=3; } },
+  { id:'c3',   icon:'💪', name:'Clic Potenciado',        desc:'+5 energía por click',      cost:300,    type:'click',   apply:()=>{ clickPow+=5; } },
+  { id:'cr1',  icon:'🎯', name:'Golpe Preciso',          desc:'+8% probabilidad crítico x2',cost:500,   type:'crit',    apply:()=>{ critChance+=0.08; } },
+  { id:'a3',   icon:'☀️', name:'Granja Solar',           desc:'+8 energía / segundo',     cost:700,    type:'auto',    apply:()=>{ autoPerSec+=8; } },
 
-  // Solar upgrades
-  { id:'solar1',   cat:'solar', icon:'☀️', name:'Paneles Eficientes', desc:'x2 producción solar',    cost:200,    req:()=>(G.buildings.solar||0)>=1,   effect:()=>{ G._bmult = G._bmult||{}; G._bmult.solar=(G._bmult.solar||1)*2; recalcAuto(); } },
-  { id:'solar2',   cat:'solar', icon:'🌞', name:'Nano-Paneles',       desc:'x2 producción solar',    cost:5000,   req:()=>(G.buildings.solar||0)>=5,   effect:()=>{ G._bmult.solar=(G._bmult.solar||1)*2; recalcAuto(); } },
-  { id:'solar3',   cat:'solar', icon:'⭐', name:'Fotones Cuánticos',  desc:'x5 producción solar',    cost:100000, req:()=>(G.buildings.solar||0)>=25,  effect:()=>{ G._bmult.solar=(G._bmult.solar||1)*5; recalcAuto(); } },
+  // ── Tier 2  (1K – 20K) ────────────────────────────
+  { id:'m1',   icon:'⚡', name:'Acelerador',             desc:'x2 toda la producción',     cost:1000,   type:'multi',   apply:()=>{ clickPow*=2; autoPerSec*=2; } },
+  { id:'c4',   icon:'🤜', name:'Puñetazo Cósmico',       desc:'+15 energía por click',     cost:1500,   type:'click',   apply:()=>{ clickPow+=15; } },
+  { id:'a4',   icon:'⚛️', name:'Reactor Nuclear',        desc:'+20 energía / segundo',    cost:2500,   type:'auto',    apply:()=>{ autoPerSec+=20; } },
+  { id:'c5',   icon:'🖐️', name:'Clic Quíntuple',         desc:'x2.5 poder de click',       cost:4000,   type:'click',   apply:()=>{ clickPow=Math.floor(clickPow*2.5); } },
+  { id:'cr2',  icon:'💢', name:'Crítico Mejorado',       desc:'Críticos hacen x3 daño',    cost:5000,   type:'crit',    apply:()=>{ critMulti=3; critChance+=0.05; } },
+  { id:'a5',   icon:'🌊', name:'Generador de Mareas',    desc:'+50 energía / segundo',    cost:7000,   type:'auto',    apply:()=>{ autoPerSec+=50; } },
+  { id:'m2',   icon:'🔥', name:'Hipercombustión',        desc:'x3 toda la producción',     cost:10000,  type:'multi',   apply:()=>{ clickPow*=3; autoPerSec*=3; } },
 
-  // Wind upgrades
-  { id:'wind1',    cat:'wind',  icon:'🌬️','name':'Turbinas Grandes',  desc:'x2 producción eólica',   cost:2000,   req:()=>(G.buildings.wind||0)>=1,    effect:()=>{ G._bmult.wind=(G._bmult.wind||1)*2; recalcAuto(); } },
-  { id:'wind2',    cat:'wind',  icon:'🌪️', name:'Vórtice de Viento',  desc:'x3 producción eólica',   cost:30000,  req:()=>(G.buildings.wind||0)>=10,   effect:()=>{ G._bmult.wind=(G._bmult.wind||1)*3; recalcAuto(); } },
+  // ── Tier 3  (20K – 500K) ──────────────────────────
+  { id:'c6',   icon:'⚡', name:'Rayo Cuántico',          desc:'+50 energía por click',     cost:20000,  type:'click',   apply:()=>{ clickPow+=50; } },
+  { id:'a6',   icon:'🌋', name:'Planta Geotérmica',      desc:'+120 energía / segundo',   cost:30000,  type:'auto',    apply:()=>{ autoPerSec+=120; } },
+  { id:'cr3',  icon:'🎆', name:'Supernova Crítica',      desc:'+15% probabilidad crítico', cost:40000,  type:'crit',    apply:()=>{ critChance+=0.15; } },
+  { id:'c7',   icon:'🌀', name:'Espiral de Energía',     desc:'x3 poder de click',         cost:60000,  type:'click',   apply:()=>{ clickPow*=3; } },
+  { id:'a7',   icon:'🔮', name:'Cristal de Energía',     desc:'+300 energía / segundo',   cost:80000,  type:'auto',    apply:()=>{ autoPerSec+=300; } },
+  { id:'m3',   icon:'💫', name:'Catalizador Estelar',    desc:'x5 toda la producción',     cost:120000, type:'multi',   apply:()=>{ clickPow*=5; autoPerSec*=5; } },
+  { id:'sp1',  icon:'🤖', name:'Auto-Clicker Básico',    desc:'+2 clicks automáticos/s',   cost:150000, type:'special', apply:()=>{ autoPerSec+=clickPow*2; } },
+  { id:'a8',   icon:'🌌', name:'Nebulosa Generadora',    desc:'+800 energía / segundo',   cost:200000, type:'auto',    apply:()=>{ autoPerSec+=800; } },
+  { id:'c8',   icon:'👊', name:'Impacto Estelar',        desc:'+200 energía por click',    cost:300000, type:'click',   apply:()=>{ clickPow+=200; } },
+  { id:'cr4',  icon:'💥', name:'Colapso Cuántico',       desc:'Críticos hacen x5 daño',    cost:400000, type:'crit',    apply:()=>{ critMulti=5; } },
 
-  // Nuclear upgrades
-  { id:'nuke1',    cat:'nuclear',icon:'⚛️',name:'Combustible Enriquecido',desc:'x2 planta nuclear', cost:15000,  req:()=>(G.buildings.nuclear||0)>=1, effect:()=>{ G._bmult.nuclear=(G._bmult.nuclear||1)*2; recalcAuto(); } },
-  { id:'nuke2',    cat:'nuclear',icon:'☢️',name:'Fusión Avanzada',    desc:'x4 planta nuclear',      cost:500000, req:()=>(G.buildings.nuclear||0)>=15,effect:()=>{ G._bmult.nuclear=(G._bmult.nuclear||1)*4; recalcAuto(); } },
+  // ── Tier 4  (500K – 20M) ──────────────────────────
+  { id:'m4',   icon:'🚀', name:'Motor de Fusión',        desc:'x8 toda la producción',     cost:500000, type:'multi',   apply:()=>{ clickPow*=8; autoPerSec*=8; } },
+  { id:'a9',   icon:'💎', name:'Cristal de Materia Oscura', desc:'+2K energía / segundo', cost:700000, type:'auto',    apply:()=>{ autoPerSec+=2000; } },
+  { id:'c9',   icon:'🌟', name:'Clic Estelar',           desc:'x4 poder de click',         cost:900000, type:'click',   apply:()=>{ clickPow*=4; } },
+  { id:'sp2',  icon:'⚙️', name:'Auto-Clicker Avanzado',  desc:'+10 clicks automáticos/s',  cost:1.2e6,  type:'special', apply:()=>{ autoPerSec+=clickPow*10; } },
+  { id:'a10',  icon:'🕳️', name:'Colector de Agujero Negro', desc:'+5K energía / segundo',cost:1.5e6,  type:'auto',    apply:()=>{ autoPerSec+=5000; } },
+  { id:'m5',   icon:'🌠', name:'Tormenta Galáctica',     desc:'x10 toda la producción',    cost:2e6,    type:'multi',   apply:()=>{ clickPow*=10; autoPerSec*=10; } },
+  { id:'c10',  icon:'🌪️', name:'Vórtice de Energía',    desc:'+1K energía por click',     cost:3e6,    type:'click',   apply:()=>{ clickPow+=1000; } },
+  { id:'cr5',  icon:'🔴', name:'Ojo del Caos',           desc:'+20% probabilidad crítico x8',cost:4e6,  type:'crit',    apply:()=>{ critChance+=0.20; critMulti=8; } },
+  { id:'a11',  icon:'🌟', name:'Esfera de Dyson',        desc:'+15K energía / segundo',   cost:6e6,    type:'auto',    apply:()=>{ autoPerSec+=15000; } },
+  { id:'m6',   icon:'✨', name:'Núcleo Galáctico',       desc:'x15 toda la producción',    cost:10e6,   type:'multi',   apply:()=>{ clickPow*=15; autoPerSec*=15; } },
 
-  // Dark matter
-  { id:'dark1',    cat:'dark',  icon:'🌑', name:'Antimateria',        desc:'x2 materia oscura',      cost:100000, req:()=>(G.buildings.dark||0)>=1,   effect:()=>{ G._bmult.dark=(G._bmult.dark||1)*2; recalcAuto(); } },
-  { id:'dark2',    cat:'dark',  icon:'🕳️', name:'Singularidad Oscura',desc:'x5 materia oscura',      cost:5e6,    req:()=>(G.buildings.dark||0)>=10,  effect:()=>{ G._bmult.dark=(G._bmult.dark||1)*5; recalcAuto(); } },
+  // ── Tier 5  (20M – 1B) ────────────────────────────
+  { id:'c11',  icon:'💠', name:'Clic Multidimensional',  desc:'x5 poder de click',         cost:20e6,   type:'click',   apply:()=>{ clickPow*=5; } },
+  { id:'a12',  icon:'🌀', name:'Generador de Agujero de Gusano', desc:'+50K energía / segundo',cost:30e6,type:'auto',   apply:()=>{ autoPerSec+=50000; } },
+  { id:'sp3',  icon:'🤖', name:'Enjambre de Clickers',   desc:'+50 clicks automáticos/s',  cost:50e6,   type:'special', apply:()=>{ autoPerSec+=clickPow*50; } },
+  { id:'m7',   icon:'🔱', name:'Modo Universo',          desc:'x25 toda la producción',    cost:80e6,   type:'multi',   apply:()=>{ clickPow*=25; autoPerSec*=25; } },
+  { id:'a13',  icon:'💥', name:'Motor del Big Bang',     desc:'+200K energía / segundo',  cost:150e6,  type:'auto',    apply:()=>{ autoPerSec+=200000; } },
+  { id:'c12',  icon:'☄️', name:'Clic del Apocalipsis',   desc:'+10K energía por click',    cost:200e6,  type:'click',   apply:()=>{ clickPow+=10000; } },
+  { id:'cr6',  icon:'🌈', name:'Arcoíris del Caos',      desc:'Críticos hacen x15 daño',   cost:300e6,  type:'crit',    apply:()=>{ critMulti=15; critChance+=0.1; } },
+  { id:'m8',   icon:'🌌', name:'Singularidad Cósmica',   desc:'x50 toda la producción',    cost:500e6,  type:'multi',   apply:()=>{ clickPow*=50; autoPerSec*=50; } },
 
-  // Quantum
-  { id:'quantum1', cat:'quantum',icon:'⚡',name:'Entrelazamiento',    desc:'x2 reactor cuántico',    cost:500000, req:()=>(G.buildings.quantum||0)>=1, effect:()=>{ G._bmult.quantum=(G._bmult.quantum||1)*2; recalcAuto(); } },
-  { id:'quantum2', cat:'quantum',icon:'🔮',name:'Superposición',      desc:'x5 reactor cuántico',    cost:2e7,    req:()=>(G.buildings.quantum||0)>=10,effect:()=>{ G._bmult.quantum=(G._bmult.quantum||1)*5; recalcAuto(); } },
-
-  // Neutron
-  { id:'neutron1', cat:'neutron',icon:'💫',name:'Colapso Estelar',    desc:'x2 estrella de neutrones',cost:5e6,   req:()=>(G.buildings.neutron||0)>=1, effect:()=>{ G._bmult.neutron=(G._bmult.neutron||1)*2; recalcAuto(); } },
-  { id:'neutron2', cat:'neutron',icon:'🌠',name:'Magnetar',           desc:'x5 estrella de neutrones',cost:5e7,   req:()=>(G.buildings.neutron||0)>=5, effect:()=>{ G._bmult.neutron=(G._bmult.neutron||1)*5; recalcAuto(); } },
-
-  // Blackhole
-  { id:'bh1',      cat:'blackhole',icon:'🕳️',name:'Hawking Radiation',desc:'x2 agujero negro',      cost:5e7,    req:()=>(G.buildings.blackhole||0)>=1,effect:()=>{ G._bmult.blackhole=(G._bmult.blackhole||1)*2; recalcAuto(); } },
-  { id:'bh2',      cat:'blackhole',icon:'💀',name:'Agujero de Muerte', desc:'x10 agujero negro',     cost:1e9,    req:()=>(G.buildings.blackhole||0)>=5,effect:()=>{ G._bmult.blackhole=(G._bmult.blackhole||1)*10; recalcAuto(); } },
-
-  // Dyson
-  { id:'dyson1',   cat:'dyson', icon:'🌟', name:'Esfera Completa',    desc:'x3 esfera de Dyson',     cost:5e8,    req:()=>(G.buildings.dyson||0)>=1,  effect:()=>{ G._bmult.dyson=(G._bmult.dyson||1)*3; recalcAuto(); } },
-  { id:'dyson2',   cat:'dyson', icon:'✨', name:'Red de Dyson',        desc:'x10 esfera de Dyson',   cost:1e10,   req:()=>(G.buildings.dyson||0)>=5,  effect:()=>{ G._bmult.dyson=(G._bmult.dyson||1)*10; recalcAuto(); } },
-
-  // Global
-  { id:'global1',  cat:'global',icon:'🌍', name:'Eficiencia Global',  desc:'x1.5 toda producción',   cost:1e6,    req:()=>totalBuildings()>=20,        effect:()=>{ G._globalMult=(G._globalMult||1)*1.5; recalcAuto(); } },
-  { id:'global2',  cat:'global',icon:'🚀', name:'Aceleración',        desc:'x2 toda producción',     cost:5e7,    req:()=>totalBuildings()>=50,        effect:()=>{ G._globalMult=(G._globalMult||1)*2; recalcAuto(); } },
-  { id:'global3',  cat:'global',icon:'🌌', name:'Modo Galáctico',     desc:'x5 toda producción',     cost:1e9,    req:()=>totalBuildings()>=100,       effect:()=>{ G._globalMult=(G._globalMult||1)*5; recalcAuto(); } },
-  { id:'global4',  cat:'global',icon:'💫', name:'Expansión Universal',desc:'x20 toda producción',    cost:1e11,   req:()=>totalBuildings()>=200,       effect:()=>{ G._globalMult=(G._globalMult||1)*20; recalcAuto(); } },
-
-  // Auto-click
-  { id:'auto1',    cat:'auto',  icon:'🤖', name:'Auto-Clicker',       desc:'1 clic automático/seg',  cost:50000,  req:()=>G.totalClicks>=1000,        effect:()=>{ G._autoClick=(G._autoClick||0)+1; } },
-  { id:'auto2',    cat:'auto',  icon:'⚙️', name:'Clicker Rápido',     desc:'+4 clics automáticos/s', cost:500000, req:()=>G.upgrades.auto1,           effect:()=>{ G._autoClick=(G._autoClick||0)+4; } },
-  { id:'auto3',    cat:'auto',  icon:'🔩', name:'Hyperdrive Clicker', desc:'+15 clics automáticos/s',cost:5e6,    req:()=>G.upgrades.auto2,           effect:()=>{ G._autoClick=(G._autoClick||0)+15; } },
+  // ── Tier 6  (1B+) — ENDGAME ───────────────────────
+  { id:'a14',  icon:'🌠', name:'Red de Estrellas de Neutrones', desc:'+1M energía / segundo',cost:1e9, type:'auto',    apply:()=>{ autoPerSec+=1e6; } },
+  { id:'c13',  icon:'🖖', name:'Toque del Creador',      desc:'x10 poder de click',        cost:2e9,    type:'click',   apply:()=>{ clickPow*=10; } },
+  { id:'m9',   icon:'♾️', name:'Bucle Infinito',         desc:'x100 toda la producción',   cost:5e9,    type:'multi',   apply:()=>{ clickPow*=100; autoPerSec*=100; } },
+  { id:'sp4',  icon:'🌐', name:'IA Cuántica',            desc:'+500 clicks automáticos/s', cost:8e9,    type:'special', apply:()=>{ autoPerSec+=clickPow*500; } },
+  { id:'a15',  icon:'💫', name:'Universo Comprimido',    desc:'+10M energía / segundo',   cost:15e9,   type:'auto',    apply:()=>{ autoPerSec+=10e6; } },
+  { id:'m10',  icon:'🏆', name:'OMEGA BOOST',            desc:'x1000 todo — FIN DEL JUEGO',cost:100e9, type:'multi',   apply:()=>{ clickPow*=1000; autoPerSec*=1000; } },
 ];
 
-// ═══════════════════════════════════════════
-//  ACHIEVEMENTS
-// ═══════════════════════════════════════════
-const ACHIEVEMENTS = [
-  { id:'first_click',    icon:'👆', name:'Primer Paso',        desc:'Haz tu primer clic',            check:()=>G.totalClicks>=1,      reward:'🎉 Bienvenido al universo' },
-  { id:'clicks100',      icon:'💪', name:'Clicker Dedicado',   desc:'100 clics totales',              check:()=>G.totalClicks>=100,    reward:'+5% prod' },
-  { id:'clicks1k',       icon:'⚡', name:'Maratonista',        desc:'1,000 clics totales',            check:()=>G.totalClicks>=1000,   reward:'+10% prod' },
-  { id:'clicks10k',      icon:'🔥', name:'Imparable',          desc:'10,000 clics totales',           check:()=>G.totalClicks>=10000,  reward:'+15% prod' },
-  { id:'clicks100k',     icon:'💥', name:'Click God',          desc:'100,000 clics totales',          check:()=>G.totalClicks>=100000, reward:'+25% prod' },
-  { id:'energy1k',       icon:'⚡', name:'Primera Chispa',     desc:'Acumula 1,000 energía',          check:()=>G.totalEnergy>=1000,   reward:'Primeros pasos' },
-  { id:'energy1m',       icon:'🌟', name:'Potencia Solar',     desc:'Acumula 1M de energía',          check:()=>G.totalEnergy>=1e6,    reward:'Energía masiva' },
-  { id:'energy1b',       icon:'💫', name:'Poder Galáctico',    desc:'Acumula 1B de energía',          check:()=>G.totalEnergy>=1e9,    reward:'Nivel cósmico' },
-  { id:'energy1t',       icon:'🌌', name:'Señor del Universo', desc:'Acumula 1T de energía',          check:()=>G.totalEnergy>=1e12,   reward:'Omnipotente' },
-  { id:'first_building', icon:'🏭', name:'Constructor',        desc:'Compra tu primer edificio',      check:()=>totalBuildings()>=1,   reward:'Automatización iniciada' },
-  { id:'buildings10',    icon:'🏙️', name:'Ciudad Galáctica',   desc:'10 edificios totales',           check:()=>totalBuildings()>=10,  reward:'+10% prod' },
-  { id:'buildings50',    icon:'🌆', name:'Imperio Industrial', desc:'50 edificios totales',           check:()=>totalBuildings()>=50,  reward:'+20% prod' },
-  { id:'buildings100',   icon:'🌃', name:'Megacorporación',    desc:'100 edificios totales',          check:()=>totalBuildings()>=100, reward:'+30% prod' },
-  { id:'first_upgrade',  icon:'⬆️', name:'Inventor',           desc:'Compra tu primera mejora',       check:()=>Object.keys(G.upgrades).length>=1, reward:'Mejora inicial' },
-  { id:'upgrades5',      icon:'🔬', name:'Científico',         desc:'5 mejoras compradas',            check:()=>Object.keys(G.upgrades).length>=5, reward:'+10% prod' },
-  { id:'upgrades15',     icon:'🧪', name:'Innovador',          desc:'15 mejoras compradas',           check:()=>Object.keys(G.upgrades).length>=15,reward:'+20% prod' },
-  { id:'aps100',         icon:'⚙️', name:'Planta de Energía',  desc:'100 energía/seg automática',     check:()=>G.autoEnergy>=100,     reward:'Flujo constante' },
-  { id:'aps1k',          icon:'🏭', name:'Fábrica Estelar',    desc:'1,000 energía/seg automática',   check:()=>G.autoEnergy>=1000,    reward:'Producción masiva' },
-  { id:'aps1m',          icon:'🌟', name:'Motor Galáctico',    desc:'1M energía/seg automática',      check:()=>G.autoEnergy>=1e6,     reward:'Velocidad de luz' },
-  { id:'prestige1',      icon:'✨', name:'Renacimiento',        desc:'Completa tu primer Prestige',    check:()=>G.prestigeCount>=1,    reward:'Nuevo comienzo' },
-  { id:'prestige5',      icon:'⭐', name:'Veterano Cósmico',   desc:'5 Prestiges completados',        check:()=>G.prestigeCount>=5,    reward:'Experiencia estelar' },
-  { id:'all_buildings',  icon:'🌌', name:'Constructor Supremo',desc:'Compra todos los tipos de edificios', check:()=>BUILDINGS.every(b=>(G.buildings[b.id]||0)>=1), reward:'Maestro de la construcción' },
-];
-
-// ═══════════════════════════════════════════
-//  STAR UPGRADES (Prestige)
-// ═══════════════════════════════════════════
-const STAR_UPGRADES = [
-  { id:'star_prod1',  icon:'⭐', name:'Energía Estelar I',   desc:'+50% producción permanente',  cost:1,  effect:()=>{ G.prestigeMultiplier*=1.5; } },
-  { id:'star_prod2',  icon:'⭐', name:'Energía Estelar II',  desc:'+100% producción permanente', cost:3,  effect:()=>{ G.prestigeMultiplier*=2; } },
-  { id:'star_prod3',  icon:'⭐', name:'Energía Estelar III', desc:'x5 producción permanente',   cost:10, effect:()=>{ G.prestigeMultiplier*=5; } },
-  { id:'star_click1', icon:'💫', name:'Dedos de Acero',      desc:'x2 clic permanente',         cost:2,  effect:()=>{ G._starClickMult=(G._starClickMult||1)*2; } },
-  { id:'star_click2', icon:'💫', name:'Manos de Dios',       desc:'x5 clic permanente',         cost:5,  effect:()=>{ G._starClickMult=(G._starClickMult||1)*5; } },
-  { id:'star_start',  icon:'🚀', name:'Inicio Rápido',       desc:'Empieza con 5 paneles solares',cost:2, effect:()=>{ G._startBuildings=true; } },
-  { id:'star_crit',   icon:'🎯', name:'Ojo de Águila',       desc:'+20% probabilidad crítico',  cost:3,  effect:()=>{ G._starCrit=true; G.critChance+=0.2; } },
-  { id:'star_auto',   icon:'🤖', name:'Automatización Estelar',desc:'Auto-clicker gratis al inicio',cost:4,effect:()=>{ G._starAuto=true; G._autoClick=(G._autoClick||0)+5; } },
-  { id:'star_prod4',  icon:'🌟', name:'Energía Cósmica',     desc:'x10 producción permanente',  cost:25, effect:()=>{ G.prestigeMultiplier*=10; } },
-  { id:'star_omega',  icon:'🌌', name:'Omega Boost',         desc:'x100 todo para siempre',     cost:100,effect:()=>{ G.prestigeMultiplier*=100; G._starClickMult=(G._starClickMult||1)*100; } },
-];
-
-// ═══════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════
+// ─────────────────────────────────────────
+//  FORMAT NUMBERS
+// ─────────────────────────────────────────
 function fmt(n) {
-  if(n===undefined||isNaN(n)) return '0';
-  const names=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc','Ud','Dd','Td'];
-  let i=0;
-  while(n>=1000 && i<names.length-1){ n/=1000; i++; }
-  if(i===0) return Math.floor(n).toString();
-  return n.toFixed(2)+names[i];
-}
-function totalBuildings() {
-  return Object.values(G.buildings).reduce((a,b)=>a+b,0);
-}
-function buildingCost(b) {
-  return Math.floor(b.baseCost * Math.pow(b.costMult, G.buildings[b.id]||0));
-}
-function recalcAuto() {
-  let ae=0, am=0;
-  G._bmult = G._bmult||{};
-  G._globalMult = G._globalMult||1;
-  for(const b of BUILDINGS){
-    const owned=G.buildings[b.id]||0;
-    const bm=G._bmult[b.id]||1;
-    ae += b.baseE * owned * bm;
-    am += b.baseM * owned * bm;
-  }
-  G.autoEnergy = ae * G._globalMult * G.prestigeMultiplier;
-  G.autoMatter = am * G._globalMult * G.prestigeMultiplier;
-}
-function effectiveClickPower() {
-  const sm = G._starClickMult||1;
-  return G.clickPower * sm * G.prestigeMultiplier;
+  if (n < 1000) return Math.floor(n).toString();
+  const tiers = ['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];
+  let i = 0;
+  while (n >= 1000 && i < tiers.length - 1) { n /= 1000; i++; }
+  return n.toFixed(2) + tiers[i];
 }
 
-// ═══════════════════════════════════════════
-//  CLICK HANDLER
-// ═══════════════════════════════════════════
-let lastClickX=0, lastClickY=0;
-function handleClick(e) {
+// ─────────────────────────────────────────
+//  CLICK
+// ─────────────────────────────────────────
+function tap(e) {
   e.preventDefault();
   const touch = e.touches ? e.touches[0] : e;
-  const x = touch ? touch.clientX : (e.clientX||window.innerWidth/2);
-  const y = touch ? touch.clientY : (e.clientY||window.innerHeight/2);
-  lastClickX=x; lastClickY=y;
-  performClick(x, y, true);
+  const x = touch ? touch.clientX : e.clientX || window.innerWidth / 2;
+  const y = touch ? touch.clientY : e.clientY || window.innerHeight / 2;
+
+  let gain = clickPow;
+  let isCrit = critChance > 0 && Math.random() < critChance;
+  if (isCrit) gain = Math.floor(gain * critMulti);
+
+  money        += gain;
+  totalEarned  += gain;
+
+  // Effects
+  spawnFloat(x, y, '+' + fmt(gain), isCrit);
+  spawnParticles(x, y, isCrit);
+  spawnRipple(x, y);
+  pulsOrb();
 }
 
-function performClick(x, y, showEffect) {
-  let power = effectiveClickPower();
-  let isCrit = Math.random() < G.critChance;
-  if(isCrit) power *= G.critMulti;
-
-  G.energy += power;
-  G.totalEnergy += power;
-  G.totalClicks++;
-
-  if(showEffect) {
-    spawnFloat(x, y, '+'+fmt(power), isCrit);
-    spawnParticles(x, y, isCrit);
-    spawnWave(x, y);
-    pulsePlanet();
-  }
-}
-
-function pulsePlanet() {
-  const p = document.getElementById('planet');
-  p.classList.add('pulse');
-  setTimeout(()=>p.classList.remove('pulse'), 100);
+function pulsOrb() {
+  const o = document.getElementById('orb');
+  o.classList.add('tap');
+  setTimeout(() => o.classList.remove('tap'), 90);
 }
 
 function spawnFloat(x, y, text, crit) {
   const el = document.createElement('div');
-  el.className = 'float-num' + (crit?' crit':'');
+  el.className = 'float';
+  const size   = crit ? '22px' : '16px';
+  const color  = crit ? '#ffd700' : '#7ab8ff';
+  const shadow = crit ? '0 0 10px #ffd700' : '0 0 6px #4f8ef7';
+  el.style.cssText = `
+    left:${x - 15 + (Math.random() * 30 - 15)}px;
+    top:${y - 10}px;
+    font-size:${size};
+    color:${color};
+    text-shadow:${shadow};
+  `;
   el.textContent = text;
-  el.style.left = (x-20+Math.random()*40-20)+'px';
-  el.style.top  = (y-20)+'px';
   document.body.appendChild(el);
-  setTimeout(()=>el.remove(), 1100);
+  setTimeout(() => el.remove(), 950);
 }
 
 function spawnParticles(x, y, crit) {
   const colors = crit
-    ? ['#ffd700','#ffaa00','#ff8800']
-    : ['#4f8ef7','#a259ff','#00e5ff'];
-  const count = crit ? 12 : 6;
-  for(let i=0;i<count;i++){
+    ? ['#ffd700','#ffaa00','#ff8800','#fff']
+    : ['#4f8ef7','#a259ff','#00e5ff','#dde4ff'];
+  const count = crit ? 10 : 5;
+  for (let i = 0; i < count; i++) {
     const el = document.createElement('div');
     el.className = 'particle';
-    const angle = (Math.PI*2/count)*i + Math.random()*.5;
-    const dist = 30+Math.random()*50;
+    const sz = 4 + Math.random() * 4;
+    const ang = (Math.PI * 2 / count) * i + Math.random() * .6;
+    const dist = 25 + Math.random() * 45;
     el.style.cssText = `
-      left:${x-3}px; top:${y-3}px;
-      background:${colors[i%colors.length]};
-      --tx:${Math.cos(angle)*dist}px;
-      --ty:${Math.sin(angle)*dist}px;
+      left:${x - sz/2}px; top:${y - sz/2}px;
+      width:${sz}px; height:${sz}px;
+      background:${colors[i % colors.length]};
+      --dx:${Math.cos(ang)*dist}px;
+      --dy:${Math.sin(ang)*dist}px;
     `;
     document.body.appendChild(el);
-    setTimeout(()=>el.remove(), 900);
+    setTimeout(() => el.remove(), 750);
   }
 }
 
-function spawnWave(x, y) {
+function spawnRipple(x, y) {
   const el = document.createElement('div');
-  el.className = 'wave-ring';
-  el.style.left = (x)+'px';
-  el.style.top  = (y)+'px';
-  el.style.transform = 'translate(-50%,-50%)';
+  el.className = 'ripple';
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
   document.body.appendChild(el);
-  setTimeout(()=>el.remove(), 650);
+  setTimeout(() => el.remove(), 580);
 }
 
-// ═══════════════════════════════════════════
-//  BUILDING BUY
-// ═══════════════════════════════════════════
-function buyBuilding(id) {
-  const b = BUILDINGS.find(x=>x.id===id);
-  const cost = buildingCost(b);
-  const totalRes = G.energy + G.matter;
-  // Pay with energy first, then matter
-  if(G.energy >= cost) {
-    G.energy -= cost;
-  } else if(G.energy + G.matter >= cost) {
-    const need = cost - G.energy;
-    G.energy = 0;
-    G.matter -= need;
-  } else { showToast('¡Energía insuficiente!'); return; }
-  G.buildings[id] = (G.buildings[id]||0)+1;
-  recalcAuto();
-  renderBuildings();
-  renderUpgrades();
-  checkAchievements();
-  showToast(`${b.icon} ${b.name} comprado (#${G.buildings[id]})`);
-}
-
-// ═══════════════════════════════════════════
-//  UPGRADE BUY
-// ═══════════════════════════════════════════
+// ─────────────────────────────────────────
+//  UPGRADE SYSTEM
+// ─────────────────────────────────────────
 function buyUpgrade(id) {
-  if(G.upgrades[id]) return;
-  const u = UPGRADES.find(x=>x.id===id);
-  if(!u || G.energy < u.cost) { showToast('¡Energía insuficiente!'); return; }
-  G.energy -= u.cost;
-  G.upgrades[id] = true;
-  u.effect();
+  const u = UPGRADES.find(u => u.id === id);
+  if (!u || purchased[id] || money < u.cost) return;
+  money -= u.cost;
+  purchased[id] = true;
+  boughtCount++;
+  u.apply();
   renderUpgrades();
-  renderBuildings();
-  checkAchievements();
-  showToast(`${u.icon} ${u.name} desbloqueado!`);
+  updateUI();
+  toast(`${u.icon} ${u.name} — activado!`);
 }
 
-// ═══════════════════════════════════════════
-//  STAR UPGRADES
-// ═══════════════════════════════════════════
-function buyStarUpgrade(id) {
-  if(G.starUpgrades[id]) return;
-  const u = STAR_UPGRADES.find(x=>x.id===id);
-  if(!u || G.stars < u.cost) { showToast('¡Estrellas insuficientes!'); return; }
-  G.stars -= u.cost;
-  G.starUpgrades[id] = true;
-  u.effect();
-  recalcAuto();
-  renderPrestige();
-  showToast(`${u.icon} ${u.name} activado!`);
+// Which upgrades are visible:
+// - Not bought yet AND totalEarned >= cost/15  (appears well before you can buy)
+// - OR already bought
+function visibleUpgrades() {
+  return UPGRADES.filter(u => purchased[u.id] || totalEarned >= u.cost / 15);
 }
 
-// ═══════════════════════════════════════════
-//  PRESTIGE
-// ═══════════════════════════════════════════
-function calcPrestigeStars() {
-  return Math.floor(Math.log10(Math.max(G.totalEnergy,10)) - 5);
-}
-
-function doPrestige() {
-  const gain = calcPrestigeStars();
-  if(G.totalEnergy < 1e6) { showToast('Necesitas 1M de energía total'); return; }
-
-  G.stars += gain;
-  G.prestigeCount++;
-
-  // Reset
-  G.energy = 0; G.matter = 0; G.totalEnergy = 0;
-  G.totalClicks = 0; G.clickPower = 1;
-  G.autoEnergy = 0; G.autoMatter = 0;
-  G.buildings = {}; G.upgrades = {};
-  G._bmult = {}; G._globalMult = 1;
-  G._autoClick = 0;
-
-  // Re-apply star upgrades
-  for(const su of STAR_UPGRADES) {
-    if(G.starUpgrades[su.id]) su.effect();
-  }
-  if(G._startBuildings) { G.buildings.solar = 5; }
-  recalcAuto();
-
-  // Flash effect
-  const flash = document.getElementById('prestige-flash');
-  flash.classList.add('show');
-  setTimeout(()=>flash.classList.remove('show'),600);
-
-  renderAll();
-  showToast(`✨ Prestige! +${gain} estrellas`);
-}
-
-// ═══════════════════════════════════════════
-//  ACHIEVEMENTS
-// ═══════════════════════════════════════════
-let achievBonus = 1;
-function checkAchievements() {
-  let changed = false;
-  for(const a of ACHIEVEMENTS) {
-    if(!G.achievements[a.id] && a.check()) {
-      G.achievements[a.id] = true;
-      changed = true;
-      showAchievePop(a);
-    }
-  }
-  if(changed) {
-    // Recalculate achievement bonus
-    const count = Object.keys(G.achievements).length;
-    achievBonus = 1 + count*0.02; // +2% per achievement
-    recalcAuto();
-    renderAchievements();
-  }
-}
-
-function showAchievePop(a) {
-  const pop = document.getElementById('achieve-pop');
-  document.getElementById('achieve-pop-name').textContent = a.icon+' '+a.name;
-  pop.classList.add('show');
-  setTimeout(()=>pop.classList.remove('show'), 3000);
-}
-
-// ═══════════════════════════════════════════
-//  MILESTONES
-// ═══════════════════════════════════════════
-const MILESTONES = [
-  { val:10,    label:'¡Primer edificio disponible!', msg:'Compra tu primer Panel Solar' },
-  { val:500,   label:'¡Edificio eólico disponible!', msg:'Desbloquea la Turbina Eólica' },
-  { val:5000,  label:'¡Planta Nuclear disponible!',  msg:'Desbloquea la Planta Nuclear' },
-  { val:100000,label:'¡Materia Oscura desbloqueada!',msg:'Accede al Colector de Materia' },
-  { val:1e6,   label:'¡Prestige disponible!',        msg:'Puedes hacer tu primer Prestige' },
-  { val:1e9,   label:'¡Agujero Negro desbloqueado!', msg:'Motor de Agujero Negro disponible' },
-  { val:1e12,  label:'¡Eres el Señor del Universo!', msg:'Has alcanzado el final del juego' },
-];
-let lastMilestone = -1;
-function updateMilestones() {
-  const e = G.totalEnergy;
-  let next = MILESTONES.find(m=>e<m.val);
-  let prev = MILESTONES.filter(m=>e>=m.val).pop();
-
-  const banner = document.getElementById('milestone-banner');
-  if(prev && MILESTONES.indexOf(prev) !== lastMilestone) {
-    lastMilestone = MILESTONES.indexOf(prev);
-    banner.textContent = '🎉 '+prev.msg;
-    banner.style.display = 'block';
-  }
-
-  const prog = document.getElementById('milestone-progress');
-  const label = document.getElementById('milestone-label');
-  if(next) {
-    const prevVal = prev ? prev.val : 0;
-    const pct = Math.min(100, ((e-prevVal)/(next.val-prevVal))*100);
-    prog.style.width = pct+'%';
-    label.textContent = 'Próximo hito: '+fmt(next.val)+' energía — '+next.label;
-  } else {
-    prog.style.width = '100%';
-    label.textContent = '🌌 ¡Has alcanzado el final del universo!';
-  }
-}
-
-// ═══════════════════════════════════════════
-//  RENDER FUNCTIONS
-// ═══════════════════════════════════════════
-function renderBuildings() {
-  const list = document.getElementById('buildings-list');
-  list.innerHTML = '';
-  for(const b of BUILDINGS) {
-    const owned = G.buildings[b.id]||0;
-    const cost = buildingCost(b);
-    const canAfford = G.energy + G.matter >= cost;
-    const em = G._bmult&&G._bmult[b.id]||1;
-    const gm = G._globalMult||1;
-    const eRate = (b.baseE * em * gm * G.prestigeMultiplier).toFixed(1);
-    const mRate = (b.baseM * em * gm * G.prestigeMultiplier).toFixed(2);
-    const locked = !canAfford && owned===0 && cost > (G.energy+G.matter)*10;
-
-    const card = document.createElement('div');
-    card.className = 'building-card' + (canAfford?' affordable':'') + (locked?' locked':'');
-    card.innerHTML = `
-      <div class="building-icon">${b.icon}</div>
-      <div class="building-info">
-        <div class="building-name">${b.name}</div>
-        <div class="building-desc">${b.desc}</div>
-        <div class="building-rate">⚡${eRate}/s${b.baseM>0?' 🔵'+mRate+'/s':''} cada uno</div>
-      </div>
-      <div class="building-right">
-        <div class="building-owned">${owned}</div>
-        <div class="building-cost">💰${fmt(cost)}</div>
-        <button class="building-buy-btn" ${!canAfford?'disabled':''}>Comprar</button>
-      </div>
-    `;
-    if(canAfford) card.onclick = ()=>buyBuilding(b.id);
-    list.appendChild(card);
-  }
-}
+let lastVisibleCount = 0;
 
 function renderUpgrades() {
-  const list = document.getElementById('upgrades-list');
-  list.innerHTML = '';
+  const list  = document.getElementById('upgrades-list');
+  const end   = document.getElementById('end-msg');
+  const items = visibleUpgrades();
 
-  const categories = [
-    { key:'click',   label:'Mejoras de Click' },
-    { key:'auto',    label:'Auto-Click' },
-    { key:'global',  label:'Mejoras Globales' },
-    { key:'solar',   label:'Paneles Solares' },
-    { key:'wind',    label:'Turbinas Eólicas' },
-    { key:'nuclear', label:'Planta Nuclear' },
-    { key:'dark',    label:'Materia Oscura' },
-    { key:'quantum', label:'Reactores Cuánticos' },
-    { key:'neutron', label:'Estrellas de Neutrones' },
-    { key:'blackhole',label:'Agujeros Negros' },
-    { key:'dyson',   label:'Esferas de Dyson' },
-  ];
-
-  for(const cat of categories) {
-    const ups = UPGRADES.filter(u=>u.cat===cat.key);
-    const visible = ups.filter(u=>!G.upgrades[u.id] ? u.req() : true);
-    if(!visible.length) continue;
-
-    const sec = document.createElement('div');
-    sec.className = 'upgrade-section';
-    sec.innerHTML = `<h3>${cat.label}</h3><div class="upgrades-grid"></div>`;
-    const grid = sec.querySelector('.upgrades-grid');
-
-    for(const u of visible) {
-      const bought = !!G.upgrades[u.id];
-      const canAfford = !bought && G.energy >= u.cost;
-      const card = document.createElement('div');
-      card.className = 'upgrade-card' + (bought?' bought':canAfford?' affordable':'');
-      card.innerHTML = `
-        <div class="up-icon">${u.icon}</div>
-        <div class="up-name">${u.name}</div>
-        <div class="up-desc">${u.desc}</div>
-        ${bought ? '<div class="up-bought">✓ Comprado</div>' : `<div class="up-cost">💰${fmt(u.cost)}</div>`}
-      `;
-      if(!bought && canAfford) card.onclick = ()=>buyUpgrade(u.id);
-      grid.appendChild(card);
+  // New unlock?
+  if (items.length > lastVisibleCount) {
+    if (lastVisibleCount > 0) {
+      flashUnlock();
+      toast('🔓 ¡Nueva mejora desbloqueada!');
     }
-    list.appendChild(sec);
+    lastVisibleCount = items.length;
   }
-}
 
-function renderAchievements() {
-  const list = document.getElementById('achievements-list');
   list.innerHTML = '';
-  for(const a of ACHIEVEMENTS) {
-    const unlocked = !!G.achievements[a.id];
-    const card = document.createElement('div');
-    card.className = 'achieve-card ' + (unlocked ? 'unlocked' : 'locked');
+
+  if (items.length === 0) {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'text-align:center;padding:30px;font-size:13px;color:var(--dim)';
+    hint.textContent = '¡Sigue clickeando para desbloquear mejoras!';
+    list.appendChild(hint);
+    return;
+  }
+
+  // Show pending first, then bought
+  const pending = items.filter(u => !purchased[u.id]);
+  const done    = items.filter(u =>  purchased[u.id]);
+
+  for (const u of [...pending, ...done]) {
+    const card     = document.createElement('div');
+    const isBought = !!purchased[u.id];
+    const canBuy   = !isBought && money >= u.cost;
+    card.className = 'upg-card' + (isBought ? ' bought' : canBuy ? ' can-buy' : '');
+
+    const pct = isBought ? 100 : Math.min(100, (money / u.cost) * 100);
+    const badge = { click:'badge-click', auto:'badge-auto', multi:'badge-multi', crit:'badge-crit', special:'badge-special' }[u.type];
+    const typeLabel = { click:'Click', auto:'Auto', multi:'Multiplicador', crit:'Crítico', special:'Especial' }[u.type];
+
     card.innerHTML = `
-      <div class="achieve-icon">${unlocked ? a.icon : '❓'}</div>
-      <div class="achieve-info">
-        <div class="achieve-name">${unlocked ? a.name : '???'}</div>
-        <div class="achieve-desc">${unlocked ? a.desc : 'Logro oculto'}</div>
-        ${unlocked ? `<div class="achieve-reward">🎁 ${a.reward}</div>` : ''}
+      <div class="upg-icon">${u.icon}</div>
+      <div class="upg-body">
+        <div class="upg-name">${u.name}</div>
+        <div class="upg-desc">${u.desc}</div>
+        <span class="upg-type-badge ${badge}">${typeLabel}</span>
+        ${!isBought ? `<div class="upg-bar-wrap"><div class="upg-bar" style="width:${pct}%"></div></div>` : ''}
+      </div>
+      <div class="upg-right">
+        ${isBought
+          ? '<div class="upg-cost bought-label">✓</div>'
+          : `<div class="upg-cost ${canBuy?'afford':''}">💰${fmt(u.cost)}</div>`
+        }
       </div>
     `;
+
+    if (canBuy) card.onclick = () => buyUpgrade(u.id);
     list.appendChild(card);
   }
+
+  // End message
+  const allBought = UPGRADES.every(u => purchased[u.id]);
+  end.style.display = allBought ? 'block' : 'none';
 }
 
-function renderPrestige() {
-  const gain = calcPrestigeStars();
-  document.getElementById('prestige-stars-gain').textContent = gain;
-  document.getElementById('prestige-bonus-text').textContent =
-    `Bonus actual: x${G.prestigeMultiplier.toFixed(1)} producción`;
-  document.getElementById('stars-display').textContent = G.stars;
-
-  const btn = document.getElementById('do-prestige');
-  if(G.totalEnergy >= 1e6) {
-    btn.disabled = false;
-    btn.textContent = `✨ Prestige (+${gain} ⭐)`;
-  } else {
-    btn.disabled = true;
-    btn.textContent = `Requiere ${fmt(1e6)} energía total (${fmt(G.totalEnergy)} acumulada)`;
-  }
-
-  // Star count header
-  const sc = document.getElementById('star-count');
-  const pb = document.getElementById('prestige-btn');
-  if(G.stars > 0 || G.prestigeCount > 0) {
-    sc.style.display = 'inline';
-    document.getElementById('star-val').textContent = G.stars;
-  }
-  if(G.totalEnergy >= 1e6) {
-    pb.style.display = 'inline-block';
-  }
-
-  // Star upgrades
-  const sul = document.getElementById('star-upgrades-list');
-  sul.innerHTML = '';
-  for(const su of STAR_UPGRADES) {
-    const bought = !!G.starUpgrades[su.id];
-    const canAfford = !bought && G.stars >= su.cost;
-    const card = document.createElement('div');
-    card.className = 'star-upgrade' + (bought ? ' bought' : '');
-    card.innerHTML = `
-      <div class="su-info">
-        <div class="su-name">${su.icon} ${su.name}</div>
-        <div class="su-desc">${su.desc}</div>
-      </div>
-      <div class="su-cost">${bought ? '✓' : '⭐'+su.cost}</div>
-    `;
-    if(!bought && canAfford) card.onclick = ()=>buyStarUpgrade(su.id);
-    sul.appendChild(card);
-  }
+function flashUnlock() {
+  const el = document.createElement('div');
+  el.className = 'unlock-flash';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 550);
 }
 
-function renderAll() {
-  renderBuildings();
-  renderUpgrades();
-  renderAchievements();
-  renderPrestige();
-}
-
-// ═══════════════════════════════════════════
-//  TABS
-// ═══════════════════════════════════════════
-function switchTab(name, el) {
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('panel-'+name).classList.add('active');
-  el.classList.add('active');
-  if(name==='prestige') renderPrestige();
-  if(name==='upgrades') renderUpgrades();
-  if(name==='achieve')  renderAchievements();
-  if(name==='build')    renderBuildings();
-}
-
-// ═══════════════════════════════════════════
+// ─────────────────────────────────────────
 //  TOAST
-// ═══════════════════════════════════════════
-let toastTimer;
-function showToast(msg) {
+// ─────────────────────────────────────────
+let toastTmr;
+function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ═══════════════════════════════════════════
+// ─────────────────────────────────────────
+//  UI UPDATE
+// ─────────────────────────────────────────
+function updateUI() {
+  document.getElementById('money').textContent = fmt(money);
+  document.getElementById('per-sec').textContent = '+' + fmt(autoPerSec) + '/s';
+  document.getElementById('click-power-display').textContent = fmt(clickPow);
+  document.getElementById('hint-val').textContent = fmt(clickPow);
+  document.getElementById('bought-count').textContent = boughtCount;
+}
+
+// ─────────────────────────────────────────
 //  GAME LOOP
-// ═══════════════════════════════════════════
+// ─────────────────────────────────────────
 let lastTick = Date.now();
-let autoClickAcc = 0;
 
-function gameTick() {
+function loop() {
   const now = Date.now();
-  const dt = Math.min((now - lastTick)/1000, 0.5);
-  lastTick = now;
+  const dt  = Math.min((now - lastTick) / 1000, 0.5);
+  lastTick  = now;
 
-  recalcAuto();
-
-  const ae = G.autoEnergy * achievBonus * dt;
-  const am = G.autoMatter * achievBonus * dt;
-  G.energy += ae;
-  G.matter += am;
-  G.totalEnergy += ae;
-
-  // Auto-click
-  if(G._autoClick) {
-    autoClickAcc += G._autoClick * dt;
-    while(autoClickAcc >= 1) {
-      autoClickAcc--;
-      const cx = window.innerWidth/2;
-      const cy = window.innerHeight/2;
-      performClick(cx, cy, false);
-    }
+  if (autoPerSec > 0) {
+    const gain = autoPerSec * dt;
+    money       += gain;
+    totalEarned += gain;
   }
-
-  // Best APS
-  const aps = G.autoEnergy + G.autoMatter;
-  if(aps > G.bestAPS) G.bestAPS = aps;
 
   updateUI();
-  checkAchievements();
-  updateMilestones();
-
-  requestAnimationFrame(gameTick);
+  renderUpgrades();
+  requestAnimationFrame(loop);
 }
 
-function updateUI() {
-  document.getElementById('res-energy').textContent = fmt(G.energy);
-  document.getElementById('res-matter').textContent = fmt(G.matter);
-  document.getElementById('res-clicks').textContent = fmt(G.totalClicks);
-  document.getElementById('res-aps').textContent = fmt(G.bestAPS);
-  document.getElementById('rate-energy').textContent = '+'+fmt(G.autoEnergy*achievBonus)+'/s';
-  document.getElementById('rate-matter').textContent = '+'+fmt(G.autoMatter*achievBonus)+'/s';
-  document.getElementById('cp-val').textContent = fmt(effectiveClickPower());
-
-  // Auto info
-  if(G.autoEnergy > 0 || G.autoMatter > 0) {
-    document.getElementById('auto-info').style.display = 'block';
-    document.getElementById('auto-val').textContent = fmt(G.autoEnergy*achievBonus)+' E + '+fmt(G.autoMatter*achievBonus)+' M';
-  }
-
-  // Prestige btn
-  if(G.totalEnergy >= 1e6) {
-    document.getElementById('prestige-btn').style.display = 'inline-block';
-  }
-}
-
-// ═══════════════════════════════════════════
+// ─────────────────────────────────────────
 //  SAVE / LOAD
-// ═══════════════════════════════════════════
-function saveGame() {
-  const save = {
-    energy: G.energy, matter: G.matter, totalEnergy: G.totalEnergy,
-    totalClicks: G.totalClicks, clickPower: G.clickPower,
-    stars: G.stars, prestigeCount: G.prestigeCount, bestAPS: G.bestAPS,
-    buildings: G.buildings, upgrades: G.upgrades,
-    achievements: G.achievements, starUpgrades: G.starUpgrades,
-    prestigeMultiplier: G.prestigeMultiplier,
-    critChance: G.critChance, critMulti: G.critMulti,
-    _bmult: G._bmult, _globalMult: G._globalMult,
-    _autoClick: G._autoClick, _starClickMult: G._starClickMult,
-    _startBuildings: G._startBuildings, _starCrit: G._starCrit,
-    _starAuto: G._starAuto,
-  };
-  localStorage.setItem('galaxy_empire_save', JSON.stringify(save));
+// ─────────────────────────────────────────
+function save() {
+  localStorage.setItem('gc_save2', JSON.stringify({
+    money, totalEarned, clickPow, autoPerSec,
+    critChance, critMulti, boughtCount,
+    purchased: Object.keys(purchased),
+  }));
 }
 
-function loadGame() {
+function load() {
   try {
-    const raw = localStorage.getItem('galaxy_empire_save');
-    if(!raw) return;
-    const save = JSON.parse(raw);
-    Object.assign(G, save);
-    recalcAuto();
-    // Recalculate achievement bonus
-    const count = Object.keys(G.achievements).length;
-    achievBonus = 1 + count*0.02;
-  } catch(e) { console.log('Save load error', e); }
+    const raw = localStorage.getItem('gc_save2');
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    money       = s.money       || 0;
+    totalEarned = s.totalEarned || 0;
+    clickPow    = s.clickPow    || 1;
+    autoPerSec  = s.autoPerSec  || 0;
+    critChance  = s.critChance  || 0;
+    critMulti   = s.critMulti   || 2;
+    boughtCount = s.boughtCount || 0;
+    (s.purchased || []).forEach(id => { purchased[id] = true; });
+    // Re-mark last visible count so we don't flash on load
+    lastVisibleCount = visibleUpgrades().length;
+  } catch(e) {}
 }
 
-// ═══════════════════════════════════════════
+// ─────────────────────────────────────────
 //  STARS BACKGROUND
-// ═══════════════════════════════════════════
-function createStarsBg() {
+// ─────────────────────────────────────────
+function buildStars() {
   const bg = document.getElementById('stars-bg');
-  for(let i=0;i<80;i++){
+  for (let i = 0; i < 70; i++) {
     const s = document.createElement('div');
-    s.className = 'star-dot';
-    const size = Math.random()*2+1;
-    const opacity = Math.random()*.6+.2;
-    const dur = (Math.random()*3+2).toFixed(1)+'s';
-    s.style.cssText = `
-      width:${size}px; height:${size}px;
-      left:${Math.random()*100}%; top:${Math.random()*100}%;
-      --o:${opacity}; --d:${dur};
-      animation-delay:${(Math.random()*3).toFixed(1)}s;
-    `;
+    s.className = 'sd';
+    const sz = (Math.random() * 2 + 1).toFixed(1);
+    const o  = (Math.random() * .5 + .1).toFixed(2);
+    const d  = (Math.random() * 3 + 2).toFixed(1) + 's';
+    const dl = (Math.random() * 4).toFixed(1) + 's';
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--o:${o};--d:${d};--delay:${dl};`;
     bg.appendChild(s);
   }
 }
 
-// ═══════════════════════════════════════════
-//  AUTO-SAVE every 30s
-// ═══════════════════════════════════════════
-setInterval(saveGame, 30000);
-
-// ═══════════════════════════════════════════
+// ─────────────────────────────────────────
 //  INIT
-// ═══════════════════════════════════════════
-createStarsBg();
-loadGame();
-renderAll();
-gameTick();
-
-// Prestige btn in header
-document.getElementById('prestige-btn').onclick = ()=>switchTab('prestige', document.querySelector('[data-tab="prestige"]'));
+// ─────────────────────────────────────────
+buildStars();
+load();
+updateUI();
+renderUpgrades();
+setInterval(save, 20000);
+loop();
 </script>
 </body>
 </html>
